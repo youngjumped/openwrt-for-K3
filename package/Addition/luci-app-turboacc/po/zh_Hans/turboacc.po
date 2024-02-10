@@ -99,3 +99,12 @@ msgstr "DNS 缓存"
 
 msgid "MTK WED WO offloading"
 msgstr "MTK 无线硬件加速"
+
+msgid "FullCone NAT Mode"
+msgstr "FullCone NAT 模式"
+
+msgid "nft_fullcone originated from Chion82"
+msgstr "原始 nft_fullcone 模式"
+
+msgid "Broadcom ASUS Merlin fullconenat in masquerade"
+msgstr "Broadcom ASUS Merlin 模式"
