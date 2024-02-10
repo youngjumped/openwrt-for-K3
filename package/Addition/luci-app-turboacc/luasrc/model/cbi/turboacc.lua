@@ -18,7 +18,7 @@ sw_flow.description = translate("Software based offloading for routing/NAT")
 sw_flow:depends("sfe_flow", 0)
 end
 
-if luci.sys.call("cat /etc/openwrt_release | grep -Eq 'filogic|mt762' ") == 0 then
+if luci.sys.call("cat /etc/openwrt_release | grep -q mt762") == 0 then
 hw_flow = s:option(Flag, "hw_flow", translate("Hardware flow offloading"))
 hw_flow.default = 0
 hw_flow.description = translate("Requires hardware NAT support, implemented at least for mt762x")
@@ -50,14 +50,10 @@ bbr_cca.description = translate("Using BBR CCA can improve TCP network performan
 end
 
 -- nftables
+if nixio.fs.access("/lib/modules/" .. kernel_version .. "/nft_fullcone.ko") then
 fullcone_nat = s:option(Flag, "fullcone_nat", translate("FullCone NAT"))
 fullcone_nat.default = 0
 fullcone_nat.description = translate("Using FullCone NAT can improve gaming performance effectively")
-
-fullcone_nat_mode = s:option(ListValue, "fullcone_nat_mode", translate("FullCone NAT Mode"))
-fullcone_nat_mode.default = 0
-fullcone_nat_mode:value("0", translate("nft_fullcone originated from Chion82"))
-fullcone_nat_mode:value("1", translate("Broadcom ASUS Merlin fullconenat in masquerade"))
-fullcone_nat_mode.description = translate("Using FullCone NAT can improve gaming performance effectively")
+end 
 
 return m
