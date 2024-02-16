@@ -144,7 +144,11 @@ check_status(){
 		fi
 		;;
 	"fullconenat")
-		if [ "$(cat "/sys/module/nft_fullcone/refcnt" 2>"/dev/null" || echo -1)" -gt "0" ]; then
+		if [ "$(cat "/sys/module/nft_fullcone/refcnt" 2>"/dev/null" || echo 0)" -ne "0" ]; then
+			echo -n "nft_fullcone originated from Chion82"
+			exit 0
+		elif nft -s list chain inet fw4 srcnat_wan | grep -qi 'masquerade brcmfullcone'; then
+			echo -n "Broadcom ASUS Merlin fullconenat"
 			exit 0
 		else
 			exit 1
