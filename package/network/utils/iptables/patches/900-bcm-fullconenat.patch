@@ -42,7 +42,7 @@
  	}
  }
  
-@@ -126,6 +141,9 @@ MASQUERADE_print(const void *ip, const s
+@@ -126,6 +132,9 @@ MASQUERADE_print(const void *ip, const s
  
  	if (r->flags & NF_NAT_RANGE_PROTO_RANDOM_FULLY)
  		printf(" random-fully");
@@ -52,7 +52,7 @@
  }
  
  static void
-@@ -145,6 +163,9 @@ MASQUERADE_save(const void *ip, const st
+@@ -145,6 +154,9 @@ MASQUERADE_save(const void *ip, const st
  
  	if (r->flags & NF_NAT_RANGE_PROTO_RANDOM_FULLY)
  		printf(" --random-fully");
