@@ -26,27 +26,20 @@
  	XTOPT_TABLEEND,
  };
  
-@@ -90,6 +94,8 @@ static void MASQUERADE_parse(struct xt_o
+@@ -89,6 +93,8 @@ static void MASQUERADE_parse(struct xt_o
+ 		portok = 1;
  	else
  		portok = 0;
- 
++		
 +	mr->range[0].min_ip = 1;
-+
+ 
  	xtables_option_parse(cb);
  	switch (cb->entry->id) {
- 	case O_TO_PORTS:
-@@ -104,6 +110,15 @@ static void MASQUERADE_parse(struct xt_o
- 	case O_RANDOM_FULLY:
- 		mr->range[0].flags |=  NF_NAT_RANGE_PROTO_RANDOM_FULLY;
- 		break;
- 	}
- }
- 
 @@ -126,6 +132,9 @@ MASQUERADE_print(const void *ip, const s
  
  	if (r->flags & NF_NAT_RANGE_PROTO_RANDOM_FULLY)
  		printf(" random-fully");
-+
++		
 +	if (r->min_ip == 1)
 +		printf(" mode: fullcone");
  }
@@ -56,7 +49,7 @@
  
  	if (r->flags & NF_NAT_RANGE_PROTO_RANDOM_FULLY)
  		printf(" --random-fully");
-+
++		
 +	if (r->min_ip == 1)
 +		printf(" --mode fullcone");
  }
