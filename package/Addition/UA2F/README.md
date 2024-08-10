@@ -1,16 +1,17 @@
-![UA2F](https://socialify.git.ci/Zxilly/UA2F/image?description=1&descriptionEditable=Change%20User-agent%20to%20F-words%20on%20OpenWRT%20router.&font=Inter&language=1&pattern=Plus&stargazers=1&theme=Light)
-
 # UA2F
 
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FZxilly%2FUA2F.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FZxilly%2FUA2F?ref=badge_shield)
+[![CodeQL](https://github.com/Zxilly/UA2F/actions/workflows/codeql.yml/badge.svg)](https://github.com/Zxilly/UA2F/actions/workflows/codeql.yml)
+[![Build OpenWRT Package](https://github.com/Zxilly/UA2F/actions/workflows/ci.yml/badge.svg)](https://github.com/Zxilly/UA2F/actions/workflows/ci.yml)
 
-暂时来说，懒得写 README，请先参照 [博客文章](https://learningman.top/archives/304) 完成操作
+参照 [博客文章](https://learningman.top/archives/304) 完成操作
 
 如果遇到了任何问题，欢迎提出 Issues，但是更欢迎直接提交 Pull Request
 
 > 由于新加入的 CONNMARK 影响，编译内核时需要添加 `NETFILTER_NETLINK_GLUE_CT` flag
+ 
+> 可以在网页 [http://ua-check.stagoh.com](http://ua-check.stagoh.com) 上测试 UA2F 是否正常工作
 
-## uci command
+## Commands
 
 ```bash
 # 启用 UA2F
@@ -29,6 +30,12 @@ uci set ua2f.firewall.handle_mmtls=1
 # 是否处理内网流量，如果你的路由器是在内网中，且你想要处理内网中的流量，那么请启用这一选项
 uci set ua2f.firewall.handle_intranet=1
 
+# 使用自定义 User-Agent
+uci set ua2f.main.custom_ua="Test UA/1.0"
+
+# 禁用 Conntrack 标记，这会降低性能，但是有助于和其他修改 Connmark 的软件共存
+uci set ua2f.main.disable_connmark=1
+
 # 应用配置
 uci commit ua2f
 
@@ -37,9 +44,14 @@ service ua2f enable
 
 # 启动 UA2F
 service ua2f start
+
+# 读取日志
+logread | grep UA2F
 ```
 
 ## 自定义 User-Agent
+
+### 集成到二进制
 
 `make menuconfig` 后，使用 option 设置
 
@@ -47,13 +59,27 @@ service ua2f start
 
 `UA2F_CUSTOM_UA` 的值必须是一个字符串，且长度不超过 `(65535 + (MNL_SOCKET_BUFFER_SIZE / 2))` 字节。 `MNL_SOCKET_BUFFER_SIZE` 的值通常为 8192。
 
-UA2F 不会修改包的大小，因此即使自定义了 User-Agent， 运行时实际的 User-Agent 会是一个从 custom ua 中截取的长度与原始 User-Agent 相同的子串。
+### 使用 uci 设置
+
+```bash
+uci set ua2f.main.custom_ua="Test UA/1.0"
+uci commit ua2f
+```
+
+> UA2F 不会修改包的大小，因此即使自定义了 User-Agent， 运行时实际的 User-Agent 会是一个从 custom ua 中截取的长度与原始 User-Agent 相同的子串，长度不足时会在末尾补空格。
+
+## 在非 OpenWRT 系统上运行
+
+自 `v4.5.0` 起，UA2F 支持在非 OpenWRT 系统上运行，但是需要手动配置防火墙规则，将需要处理的流量转发到 `netfilter-queue` 的 10010 队列中。
+
+编译时，需要添加 `-DUA2F_ENABLE_UCI=OFF` flag 至 CMake。
 
 ## TODO
 
 - [ ] pthread 支持，由不同线程完成入队出队
-- [ ] 清除 TCP Header 中的 timestamp，有论文认为这可以被用来识别 NAT 后的多设备，劫持 NTP 服务器并不一定有效
-
+- [ ] 重写正则匹配为 parser
+- [ ] 以连接为单位维护 parser 状态
 
 ## License
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FZxilly%2FUA2F.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FZxilly%2FUA2F?ref=badge_large)
+
+[GPL-3.0](./LICENSE)

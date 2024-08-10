@@ -80,7 +80,8 @@ struct nlmsghdr *nfqueue_put_header(int queue_num, int msg_type) {
     void *buf = malloc(SEND_BUF_LEN);
     ASSERT(buf != NULL);
     struct nlmsghdr *nlh = mnl_nlmsg_put_header(buf);
-    ASSERT(nlh == buf);
+    ASSERT(nlh != NULL); // fixme: workaround CLion bug
+
     nlh->nlmsg_type = (NFNL_SUBSYS_QUEUE << 8) | msg_type;
     nlh->nlmsg_flags = NLM_F_REQUEST;
 
@@ -347,7 +348,7 @@ static bool inline read_ip_addr(struct nlattr *attr, int af, ip_address_t *ip_nu
         void *addr = mnl_attr_get_payload(attr);
         if (addr == NULL)
             return false;
-        int ip_ver = 0;
+        int ip_ver;
         if (af == AF_INET) {
             memset(&ip_num->ip, 0, sizeof(ip_num->ip));
             memcpy(&ip_num->ip4, addr, sizeof(uint32_t));
@@ -566,7 +567,7 @@ nfqueue_receive() while packet object is being processed by another thread.
 
 // Return false on failure
 // If queue_len is zero, use default value
-bool nfqueue_open(struct nf_queue *q, int queue_num, uint32_t queue_len) {
+bool nfqueue_open(struct nf_queue *q, int queue_num, uint32_t queue_len, bool skip_conntrack) {
     memset(q, 0, sizeof(*q));
     q->queue_num = queue_num;
 
@@ -596,9 +597,11 @@ bool nfqueue_open(struct nf_queue *q, int queue_num, uint32_t queue_len) {
     In kernel 4.15 modprobe-only method is not sufficient, rule containing -m conntrack must be used.
     Otherwise, conntrack info is not passed by kernel (both NFQA_CT and NFQA_CT_INFO attributes are missing).
     */
-    if (nfqueue_set_params(q->nl_socket, queue_num, NFQNL_COPY_PACKET, 0xFFFF, queue_len, NFQA_CFG_F_CONNTRACK) < 0) {
-        LOG_SYSERR("nfqueue_set_params");
-        return false;
+    if (!skip_conntrack) {
+        if (nfqueue_set_params(q->nl_socket, queue_num, NFQNL_COPY_PACKET, 0xFFFF, queue_len, NFQA_CFG_F_CONNTRACK) < 0) {
+            LOG_SYSERR("nfqueue_set_params");
+            return false;
+        }
     }
 
     ssize_t sockopt = 1;

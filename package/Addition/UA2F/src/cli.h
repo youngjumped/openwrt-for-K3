@@ -1,7 +1,3 @@
-//
-// Created by zxilly on 2023/5/22.
-//
-
 #ifndef UA2F_CLI_H
 #define UA2F_CLI_H
 
@@ -25,4 +21,6 @@
 
 void try_print_info(int argc, char *argv[]);
 
-#endif //UA2F_CLI_H
+void require_root();
+
+#endif // UA2F_CLI_H

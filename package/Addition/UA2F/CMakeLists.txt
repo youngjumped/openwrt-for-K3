@@ -3,6 +3,9 @@ project(UA2F LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 17)
 
+OPTION(UA2F_BUILD_TESTS "Build tests" OFF)
+OPTION(UA2F_ENABLE_UCI "Enable UCI support" ON)
+
 find_package(Git)
 if(GIT_FOUND)
     execute_process(
@@ -42,10 +45,7 @@ add_compile_definitions(UA2F_GIT_BRANCH="${GIT_BRANCH}")
 add_compile_definitions(UA2F_GIT_TAG="${GIT_TAG}")
 add_compile_definitions(UA2F_VERSION="${UA2F_VERSION_STR}")
 
-include(CheckSymbolExists)
-check_symbol_exists(__malloc_hook "malloc.h" IS_LIBC_GLIBC)
-
-if (IS_LIBC_GLIBC)
+if (UA2F_ENABLE_ASAN)
     add_compile_options(-fsanitize=address)
     add_link_options(-fsanitize=address)
 else ()
@@ -76,9 +76,17 @@ add_executable(ua2f
         src/cache.c
         src/handler.c
         src/cli.c
+        src/config.c
         src/third/nfqueue-mnl.c)
 
 target_link_libraries(ua2f mnl netfilter_queue pthread nfnetlink)
+
+if (UA2F_ENABLE_UCI)
+    add_compile_definitions(UA2F_ENABLE_UCI=1)
+    target_link_libraries(ua2f uci)
+else ()
+    message(STATUS "UCI support is disabled.")
+endif ()
 
 install(TARGETS ua2f RUNTIME DESTINATION bin)
 
@@ -86,7 +94,6 @@ if (UA2F_BUILD_TESTS)
     set(CMAKE_CXX_STANDARD 14)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-    cmake_policy(SET CMP0135 NEW)
     include(FetchContent)
     FetchContent_Declare(
             googletest
@@ -100,6 +107,7 @@ if (UA2F_BUILD_TESTS)
     add_executable(
             ua2f_test
             test/util_test.cc
+            test/cache_test.cc
             src/util.c
             src/cache.c
             src/cli.c
