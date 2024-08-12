@@ -31,7 +31,7 @@
  	else
  		portok = 0;
 +		
-+	mr->range[0].min_ip = 1;
++	mr->range[0].min_ip = 0;
  
  	xtables_option_parse(cb);
  	switch (cb->entry->id) {
