@@ -19,7 +19,7 @@ define Package/default-settings
   CATEGORY:=LuCI
   TITLE:=LuCI support for Default Settings
   PKGARCH:=all
-  DEPENDS:=+luci-base +luci +@LUCI_LANG_zh_Hans +luci-compat +luci-mod-rpc +k3screenctrl
+  DEPENDS:=+luci-base +luci +@LUCI_LANG_zh_Hans +luci-compat +luci-mod-rpc +k3screenctrl +htop
 endef
 
 define Package/default-settings/description
