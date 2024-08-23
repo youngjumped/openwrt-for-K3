@@ -152,7 +152,7 @@
  
 --- a/net/netfilter/nf_conntrack_ecache.c
 +++ b/net/netfilter/nf_conntrack_ecache.c
-@@ -143,12 +143,23 @@ static int __nf_conntrack_eventmask_repo
+@@@ -143,12 +143,23 @@ static int __nf_conntrack_eventmask_repo
  	rcu_read_lock();
  
  	notify = rcu_dereference(net->ct.nf_conntrack_event_cb);
